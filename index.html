@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>حساب شمش</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="حساب شمش">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f3f2ee" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#15161a" media="(prefers-color-scheme: dark)">
+<style>
+@font-face{font-family:"Vazirmatn";font-weight:400;font-display:swap;src:url(fonts/vazirmatn-arabic-400-normal.woff2) format("woff2")}
+@font-face{font-family:"Vazirmatn";font-weight:700;font-display:swap;src:url(fonts/vazirmatn-arabic-700-normal.woff2) format("woff2")}
+@font-face{font-family:"Vazirmatn";font-weight:800;font-display:swap;src:url(fonts/vazirmatn-arabic-800-normal.woff2) format("woff2")}
+html,body{margin:0}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+[hidden]{display:none!important}
+
+/* Layout: one narrow column for the phone; sticky metal tabs, a rate field per group, then a price list. */
+:root{
+  --bg:#f3f2ee; --surface:#ffffff; --fg:#1d1b16; --muted:#6c675c; --line:#e2dfd6;
+  --gold:#9a6f12; --gold-soft:#f6ecd2; --silver:#56606b; --silver-soft:#e7eaee;
+  --accent:var(--gold); --accent-soft:var(--gold-soft);
+  --danger:#b3261e;
+  --font:"Vazirmatn",Tahoma,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#15161a; --surface:#1f2026; --fg:#efece4; --muted:#a29d91; --line:#33343b;
+  --gold:#e0b54a; --gold-soft:#3a2f14; --silver:#b9c3cf; --silver-soft:#2b3038;
+  --danger:#ff8a80; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#15161a; --surface:#1f2026; --fg:#efece4; --muted:#a29d91; --line:#33343b;
+  --gold:#e0b54a; --gold-soft:#3a2f14; --silver:#b9c3cf; --silver-soft:#2b3038;
+  --danger:#ff8a80; color-scheme:dark}
+body.silver{--accent:var(--silver); --accent-soft:var(--silver-soft)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 40px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:560px;margin:0 auto}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:14px 10px}
+h1{font-size:1.15rem;font-weight:800;margin:0 0 10px}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px}
+.tabs button{font:inherit;font-weight:700;border:0;border-radius:9px;padding:9px;background:transparent;color:var(--muted);cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--accent-soft);color:var(--accent)}
+section.group{margin-top:18px;display:flex;flex-direction:column;gap:10px}
+.ghead{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ghead h2{margin:0;font-size:1.05rem;font-weight:800}
+.btn{font:inherit;font-size:.85rem;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:9px;padding:6px 12px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+.btn.danger{color:var(--danger);border-color:var(--danger)}
+.btn:focus-visible,.tabs button:focus-visible,input:focus-visible,.price:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.rate{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.rate label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:4px}
+.rate .row{display:flex;align-items:baseline;gap:8px}
+.rate input{flex:1;min-width:0;font:inherit;font-size:1.6rem;font-weight:800;border:0;background:transparent;color:var(--fg);padding:0;font-variant-numeric:tabular-nums;direction:ltr;text-align:right}
+.rate input::placeholder{color:var(--line)}
+.unit{color:var(--muted);font-size:.85rem}
+.table{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.thead,.trow{display:grid;grid-template-columns:4.2rem 1fr 1fr;align-items:center;gap:8px;padding:10px 12px}
+.thead{font-size:.78rem;color:var(--muted);font-weight:600;border-bottom:1px solid var(--line)}
+.trow+.trow{border-top:1px solid var(--line)}
+.w{font-weight:800}
+.w small{font-weight:500;color:var(--muted);font-size:.75rem}
+.price{font:inherit;border:0;background:transparent;color:var(--fg);text-align:right;padding:2px 0;cursor:pointer;font-variant-numeric:tabular-nums;font-weight:700;font-size:1rem;min-width:0;overflow-wrap:anywhere}
+.price.cust{color:var(--accent)}
+.price .fee{display:block;font-size:.7rem;font-weight:500;color:var(--muted)}
+.empty{padding:14px;color:var(--muted);font-size:.85rem}
+/* edit mode */
+.edit{display:flex;flex-direction:column;gap:10px}
+.ecard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.ecard .top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.field{display:flex;flex-direction:column;gap:2px;min-width:0}
+.field span{font-size:.72rem;color:var(--muted)}
+.field input{font:inherit;width:100%;min-width:0;border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--bg);color:var(--fg);direction:ltr;text-align:right;font-variant-numeric:tabular-nums}
+.pair{display:grid;grid-template-columns:1fr 1.6fr;gap:8px}
+.ptitle{font-size:.8rem;font-weight:700}
+.ptitle.cust{color:var(--accent)}
+.wfield{max-width:9rem}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.note{font-size:.78rem;color:var(--muted);margin:0}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 16px;border-radius:10px;font-size:.85rem;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion: reduce){.toast{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap" dir="rtl">
+  <header>
+    <h1>حساب شمش</h1>
+    <div class="tabs" role="tablist">
+      <button id="tab-gold" role="tab" aria-selected="true" data-tab="gold">طلا</button>
+      <button id="tab-silver" role="tab" aria-selected="false" data-tab="silver">نقره</button>
+    </div>
+  </header>
+  <main id="main"></main>
+  <p class="note" style="margin-top:22px">قیمت = (نرخ یک گرم + درصد اجرت) × وزن + اجرت ثابت. همه مبالغ به تومان است. روی هر قیمت بزنید تا کپی شود.</p>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+const KEY='shemsh-calc-v1';
+const DEFAULTS=[
+  {id:'gold',tab:'gold',title:'شمش طلا',rateLabel:'نرخ یک گرم طلای ۱۸ عیار',rate:24687000,items:[
+    {w:0.15,cp:0,cf:500000,sp:0,sf:850000},
+    {w:0.25,cp:0,cf:500000,sp:0,sf:850000},
+    {w:0.5,cp:0,cf:500000,sp:0,sf:850000},
+    {w:1,cp:1.5,cf:200000,sp:2.5,sf:300000},
+    {w:2,cp:1.5,cf:200000,sp:2.5,sf:300000},
+    {w:3,cp:1.5,cf:200000,sp:2.5,sf:300000},
+    {w:4,cp:1.5,cf:200000,sp:2.5,sf:300000},
+    {w:5,cp:1,cf:200000,sp:2,sf:300000}]},
+  {id:'silver',tab:'silver',title:'شمش نقره',rateLabel:'نرخ یک گرم نقره',rate:420000,items:[
+    {w:1,cp:0,cf:400000,sp:0,sf:600000},
+    {w:2,cp:0,cf:400000,sp:0,sf:700000},
+    {w:3,cp:0,cf:400000,sp:0,sf:700000},
+    {w:4,cp:0,cf:400000,sp:0,sf:700000},
+    {w:5,cp:0,cf:400000,sp:0,sf:700000}]},
+  {id:'pellet',tab:'silver',title:'ساچمه نقره',rateLabel:'نرخ یک گرم ساچمه نقره',rate:0,items:[]}
+];
+const clone=o=>JSON.parse(JSON.stringify(o));
+let state={tab:'gold',groups:clone(DEFAULTS)};
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&Array.isArray(s.groups))state=s;}catch(e){}
+if(!state.pelletEmptied){const p=state.groups.find(g=>g.id==='pellet');if(p){p.items=[];p.rate=0;}state.pelletEmptied=1;}
+const editing={};
+const confirmDel={};
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+
+const fa=n=>Number(n).toLocaleString('fa-IR',{maximumFractionDigits:3});
+function toNum(str){
+  if(typeof str!=='string')str=String(str??'');
+  str=str.replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+         .replace(/[٫]/g,'.').replace(/[,٬\s]/g,'');
+  const n=parseFloat(str);return isFinite(n)?n:0;
+}
+const price=(rate,w,p,f)=>Math.round(rate*(1+p/100)*w+f);
+function feeText(p,f){const parts=[];if(p)parts.push(fa(p)+'٪');if(f)parts.push(fa(f));return parts.length?'اجرت '+parts.join(' + '):'بدون اجرت';}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+const main=document.getElementById('main');
+
+function render(){
+  document.body.classList.toggle('silver',state.tab==='silver');
+  document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===state.tab));
+  main.innerHTML=state.groups.filter(g=>g.tab===state.tab).map(g=>`
+  <section class="group" data-g="${g.id}">
+    <div class="ghead"><h2>${esc(g.title)}</h2>
+      <button class="btn${editing[g.id]?' primary':''}" data-act="toggle">${editing[g.id]?'تمام':'ویرایش اجرت‌ها'}</button></div>
+    <div class="rate"><label for="rate-${g.id}">${esc(g.rateLabel)}</label>
+      <div class="row"><input id="rate-${g.id}" inputmode="numeric" autocomplete="off" placeholder="۰" value="${g.rate?fa(g.rate):''}" data-act="rate"><span class="unit">تومان</span></div></div>
+    ${editing[g.id]?editView(g):tableView(g)}
+  </section>`).join('');
+}
+function tableView(g){
+  if(!g.items.length)return `<div class="table"><div class="empty">هنوز موردی اضافه نشده. «ویرایش اجرت‌ها» را بزنید و «+ افزودن شمش» را انتخاب کنید.</div></div>`;
+  const items=g.items.map((it,i)=>({it,i})).sort((a,b)=>a.it.w-b.it.w);
+  return `<div class="table"><div class="thead"><span>وزن</span><span>همکار</span><span>مشتری</span></div>
+  ${items.map(({it,i})=>{const c=price(g.rate,it.w,it.cp,it.cf),s=price(g.rate,it.w,it.sp,it.sf);return `
+    <div class="trow" id="row-${g.id}-${i}"><span class="w">${fa(it.w)} <small>گرم</small></span>
+      <button class="price" data-copy="${c}" aria-label="کپی قیمت همکار">${fa(c)}<span class="fee">${feeText(it.cp,it.cf)}</span></button>
+      <button class="price cust" data-copy="${s}" aria-label="کپی قیمت مشتری">${fa(s)}<span class="fee">${feeText(it.sp,it.sf)}</span></button></div>`}).join('')}
+  </div>`;
+}
+function editView(g){
+  const f=(i,k,label,v)=>`<label class="field"><span>${label}</span><input id="e-${g.id}-${i}-${k}" inputmode="decimal" data-i="${i}" data-k="${k}" value="${v?fa(v):''}" placeholder="۰"></label>`;
+  return `<div class="edit">${g.items.map((it,i)=>`
+    <div class="ecard">
+      <div class="top"><div class="wfield">${f(i,'w','وزن (گرم)',it.w)}</div>
+        <button class="btn danger" data-act="del" data-i="${i}">${confirmDel[g.id+'-'+i]?'مطمئنید؟ حذف':'حذف'}</button></div>
+      <div class="ptitle">فروش همکار</div>
+      <div class="pair">${f(i,'cp','درصد',it.cp)}${f(i,'cf','اجرت ثابت (تومان)',it.cf)}</div>
+      <div class="ptitle cust">فروش مشتری</div>
+      <div class="pair">${f(i,'sp','درصد',it.sp)}${f(i,'sf','اجرت ثابت (تومان)',it.sf)}</div>
+    </div>`).join('')}
+    <div class="actions"><button class="btn primary" data-act="add">+ افزودن شمش</button>
+      <button class="btn" data-act="reset">${confirmDel[g.id+'-reset']?'مطمئنید؟ برگرداندن':'برگرداندن به پیش‌فرض'}</button></div>
+    <p class="note">درصد را مثل ۱.۵ بنویسید. اجرت ثابت برای هر قطعه است.</p></div>`;
+}
+
+const G=el=>state.groups.find(g=>g.id===el.closest('section.group').dataset.g);
+
+document.querySelector('.tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;state.tab=b.dataset.tab;save();render();});
+
+main.addEventListener('input',e=>{
+  const t=e.target, g=G(t);
+  if(t.dataset.act==='rate'){
+    const n=Math.round(toNum(t.value)); g.rate=n; save();
+    // reformat with separators, keep caret at end
+    t.value=n?fa(n):'';
+    const sec=t.closest('section.group'), tbl=sec.querySelector('.table');
+    if(tbl){const tmp=document.createElement('div');tmp.innerHTML=tableView(g);tbl.replaceWith(tmp.firstElementChild);}
+  }else if(t.dataset.k){
+    g.items[+t.dataset.i][t.dataset.k]=toNum(t.value); save();
+  }
+});
+main.addEventListener('change',e=>{
+  const t=e.target; if(!t.dataset.k)return;
+  t.value=toNum(t.value)?fa(toNum(t.value)):'';
+});
+main.addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  if(b.dataset.copy){copy(b.dataset.copy);return;}
+  const g=G(b), act=b.dataset.act;
+  if(act==='toggle'){editing[g.id]=!editing[g.id];Object.keys(confirmDel).forEach(k=>delete confirmDel[k]);render();}
+  else if(act==='add'){const last=g.items[g.items.length-1]||{w:1,cp:0,cf:0,sp:0,sf:0};g.items.push({...last,w:0});save();render();
+    const inp=document.getElementById(`e-${g.id}-${g.items.length-1}-w`);if(inp){inp.focus();inp.scrollIntoView({block:'center'});}}
+  else if(act==='del'){const k=g.id+'-'+b.dataset.i;if(confirmDel[k]){g.items.splice(+b.dataset.i,1);Object.keys(confirmDel).forEach(x=>delete confirmDel[x]);save();toast('حذف شد');}else{confirmDel[k]=1;}render();}
+  else if(act==='reset'){const k=g.id+'-reset';if(confirmDel[k]){const d=DEFAULTS.find(x=>x.id===g.id);g.items=clone(d.items);delete confirmDel[k];save();toast('اجرت‌ها به پیش‌فرض برگشت');}else confirmDel[k]=1;render();}
+});
+function copy(v){
+  const text=Number(v).toLocaleString('fa-IR');
+  const ok=()=>toast('کپی شد: '+text+' تومان');
+  try{navigator.clipboard.writeText(text).then(ok,()=>toast(text+' تومان'));}catch(e){toast(text+' تومان');}
+}
+let tt;function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('show'),1800);}
+
+render();
+})();
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
+</script>
+
+</body>
+</html>
